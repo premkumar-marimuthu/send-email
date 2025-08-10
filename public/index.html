@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Send Email</title>
+  <style>
+    body { background:#0f1724; color:#e6eef8; font-family:system-ui,Segoe UI,Roboto; padding:2rem; }
+    .card { max-width:700px; margin:0 auto; background:#111827; padding:1.5rem; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.6); }
+    input, textarea { width:100%; padding:.6rem; margin-top:.5rem; background:#0b1220; border:1px solid #2b2f3a; color:#e6eef8; border-radius:6px; }
+    button { background:#7c3aed; color:white; border:none; padding:.7rem 1rem; border-radius:6px; cursor:pointer; }
+    .muted { color:#9ca3af; font-size:.9rem; }
+    .row { margin-bottom:1rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Send Email (from your email)</h1>
+    <p class="muted">Emails will be sent using the SMTP credentials you configured on the server.</p>
+
+    <div class="row">
+      <label>Recipient (to)</label>
+      <input id="to" type="email" placeholder="recipient@example.com" />
+    </div>
+
+    <div class="row">
+      <label>Subject</label>
+      <input id="subject" type="text" placeholder="Subject" />
+    </div>
+
+    <div class="row">
+      <label>Message</label>
+      <textarea id="message" rows="6" placeholder="Write your message..."></textarea>
+    </div>
+
+    <div class="row">
+      <button id="sendBtn">Send</button>
+      <span id="status" style="margin-left:12px"></span>
+    </div>
+  </div>
+
+<script>
+document.getElementById('sendBtn').addEventListener('click', async () => {
+  const to = document.getElementById('to').value.trim();
+  const subject = document.getElementById('subject').value.trim();
+  const message = document.getElementById('message').value.trim();
+  const status = document.getElementById('status');
+
+  status.textContent = '';
+  if (!to || !message) { status.textContent = 'Fill recipient & message'; return; }
+
+  status.textContent = 'Sending...';
+  try {
+    const res = await fetch('/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, message })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      status.textContent = 'Sent ✔️';
+    } else {
+      status.textContent = 'Error: ' + (data.error || 'unknown');
+    }
+  } catch (err) {
+    status.textContent = 'Network error';
+  }
+});
+</script>
+</body>
+</html>
